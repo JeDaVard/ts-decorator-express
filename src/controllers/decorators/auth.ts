@@ -3,6 +3,7 @@ import { use } from './middleware'
 import { controller } from './controller'
 import { RequestB } from '../../types'
 import { NextFunction, Request, Response } from 'express'
+import { validator } from './validators'
 
 const makeSureUsersNotLoggedIn = (req: RequestB, res: Response, next: NextFunction) => {
     if (req.session && req.session.loggedIn) {
@@ -12,6 +13,7 @@ const makeSureUsersNotLoggedIn = (req: RequestB, res: Response, next: NextFuncti
 }
 const logger = (req: RequestB, res: Response, next: NextFunction) => {
     console.log(`[${new Date(Date.now()).toLocaleDateString()}] New request...`)
+    console.log(req.body)
     next()
 }
 
@@ -32,10 +34,11 @@ class AuthController {
 
     @post('/')
     @use(makeSureUsersNotLoggedIn)
+    @validator('email', 'password')
     signIn(req: RequestB, res: Response): void {
         const { email, password } = req.body
 
-        if (email && password && email === 'admin@a.com' && password === 'password') {
+        if (email === 'admin@a.com' && password === 'password') {
             req.session = { loggedIn: true }
             res.status(201).redirect('/')
         } else {
